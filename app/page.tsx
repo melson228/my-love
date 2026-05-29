@@ -473,20 +473,30 @@ export default function Home() {
   // Механика покупки апгрейдов
   const buyUpgrade = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setUpgrades((prev) =>
-      prev.map((up) => {
-        if (up.id === id && clicks >= up.cost) {
-          setClicks((c) => c - up.cost);
-          playLevelUpSound();
-          return {
-            ...up,
-            count: up.count + 1,
-            cost: Math.floor(up.cost * 1.45), // Каждая покупка делает апгрейд дороже
-          };
-        }
-        return up;
-      }),
-    );
+
+    // Сначала находим конкретный апгрейд, который хотим купить
+    const upgradeToBuy = upgrades.find((up) => up.id === id);
+
+    // Проверяем, существует ли он и хватает ли у нас лучиков
+    if (upgradeToBuy && clicks >= upgradeToBuy.cost) {
+      // Списываем стоимость ОДИН раз
+      setClicks((c) => c - upgradeToBuy.cost);
+      playLevelUpSound();
+
+      // Обновляем массив апгрейдов
+      setUpgrades((prev) =>
+        prev.map((up) => {
+          if (up.id === id) {
+            return {
+              ...up,
+              count: up.count + 1,
+              cost: Math.floor(up.cost * 1.45), // Увеличиваем цену для следующей покупки
+            };
+          }
+          return up;
+        }),
+      );
+    }
   };
 
   // Сброс прогресса (при необходимости начать заново)
